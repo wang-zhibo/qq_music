@@ -9,6 +9,7 @@
 import re
 import os
 import jieba
+import fool
 import codecs
 import pymongo
 from scipy.misc import imread
@@ -43,15 +44,20 @@ emoji_pattern = re.compile(
 def remove_emoji(text):
     return emoji_pattern.sub(r'', text)
 
-def save_jieba_result(comment_text):
+def save_jieba_result(comment_text, fenci):
     comment_text = remove_emoji(comment_text)
-    cut_text = " ".join(jieba.cut(comment_text))
-    with codecs.open('pjl_jieba.txt', 'w', encoding='utf-8') as f:
+    if fenci == "jieba":
+        cut_text = " ".join(jieba.cut(comment_text))
+    else:
+        dd = fool.cut(comment_text)
+        cut_text = " ".join(fool.cut(comment_text)[0])
+    with codecs.open('pjl_{0}.txt'.format(fenci), 'w', encoding='utf-8') as f:
         f.write(cut_text)
 
 
-def draw_wordcloud(file_name):
-    with codecs.open(file_name,encoding='utf-8') as f:
+def draw_wordcloud(fenci):
+    file_name = 'pjl_{0}.txt'.format(fenci)
+    with codecs.open(file_name, encoding='utf-8') as f:
         comment_text = f.read()
     color_mask = imread('/Users/work/Downloads/e0f057b7a1a61de962d89347b6d7201f-d4o1tzm.jpg')
     font = r'/Users/work/Downloads/simfang.ttf'
@@ -67,17 +73,21 @@ def draw_wordcloud(file_name):
     )
 
     word_cloud = cloud.generate(comment_text)
-    word_cloud.to_file('end.jpg')
+    word_cloud.to_file('{0}.jpg'.format(fenci))
 
 
 def run():
+    fenci_list = ["jieba", "fool"]
     db = mongo_con_keepalive()
     datas = db.get_collection("qq_music_comment").find({})
     print("count: ", datas.count())
-    comment_text = "".join([ i.get("rootcommentcontent").strip() for i in datas if i.get("rootcommentcontent")])
-    save_jieba_result(comment_text)
+    comment_text = "".join([i.get("rootcommentcontent").strip() for i in datas if i.get("rootcommentcontent")])
+    for fenci in fenci_list:
+        print(fenci)
+        save_jieba_result(comment_text, fenci)
+        draw_wordcloud(fenci)
 
 
 if __name__ == "__main__":
-    # run()
-    draw_wordcloud('pjl_jieba.txt')
+    run()
+
