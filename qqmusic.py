@@ -39,7 +39,7 @@ class Crawl():
         "Origin": "https://y.qq.com",
     }
     insert_table = "qq_music_comment"
-    proxyMeta = "http://H4O6Y9PI266660WD:0A604C09CDF7BED6@proxy.abuyun.com:9020"
+    proxyMeta = "http://xxxx:xxxx@proxy.abuyun.com:9020"
     proxies = {
                 "http": proxyMeta,
                 "https": proxyMeta,
